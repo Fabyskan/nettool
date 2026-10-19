@@ -56,7 +56,7 @@ impl Subnet {
 
 fn main() {
     let addr = Ipv4Addr::new(10, 0, 5, 77);
-    let subnet = match Subnet::new(addr, 33) {
+    let subnet = match Subnet::new(addr, 22) {
         Err(msg) => {
             println!("Fehler: {msg}");
             return;
@@ -129,7 +129,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_22_netadress() {
+    fn prefix_22_net_adress() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 22);
         assert_eq!(
@@ -186,7 +186,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_0_netadress() {
+    fn prefix_0_net_adress() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 0);
         assert_eq!(
@@ -237,7 +237,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_31_netadress() {
+    fn prefix_31_net_adress() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 31);
         assert_eq!(
@@ -288,7 +288,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_netadress() {
+    fn prefix_32_net_adress() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 32);
         assert_eq!(
@@ -339,7 +339,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_netadress_0000() {
+    fn prefix_32_net_adress_0000() {
         let addr = Ipv4Addr::new(0, 0, 0, 0);
         let subnet = Subnet::new(addr, 32);
         assert_eq!(
@@ -389,7 +389,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_netadress_255() {
+    fn prefix_32_net_adress_255() {
         let addr = Ipv4Addr::new(255, 255, 255, 255);
         let subnet = Subnet::new(addr, 32);
         assert_eq!(
