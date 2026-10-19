@@ -1,10 +1,10 @@
 use std::net::Ipv4Addr;
 
 fn main() {
-    let prefix: u8 = 0; // /22
+    let prefix: u8 = 22;
     let hostbits: u8 = 32 - prefix;
     let subnet_mask: u32 = u32::MAX << hostbits;
-    let addr = Ipv4Addr::new(10, 0, 5, 77); // 10.0.5.77
+    let addr = Ipv4Addr::new(10, 0, 5, 77);
     let addr_bits: u32 = addr.to_bits();
     let net_addr: u32 = subnet_mask & addr_bits;
     let broadcast: u32 = !subnet_mask | addr_bits;
