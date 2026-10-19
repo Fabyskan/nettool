@@ -3,7 +3,7 @@ use std::net::Ipv4Addr;
 fn main() {
     let prefix: u8 = 22;
     let hostbits: u8 = 32 - prefix;
-    let subnet_mask: u32 = u32::MAX << hostbits;
+    let subnet_mask: u32 = if prefix != 0 { u32::MAX << hostbits } else { 0 };
     let addr = Ipv4Addr::new(10, 0, 5, 77);
     let addr_bits: u32 = addr.to_bits();
     let net_addr: u32 = subnet_mask & addr_bits;
@@ -11,6 +11,7 @@ fn main() {
     let first_host = Ipv4Addr::from_bits(net_addr + 1);
     let last_host = Ipv4Addr::from_bits(broadcast - 1);
     let total_hosts: u32 = !subnet_mask - 1;
+
     println!("IPv4: {addr}");
     println!("IPv4 binary: {:032b}", addr_bits);
     println!("Prefix: {prefix}");
