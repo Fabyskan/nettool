@@ -56,7 +56,7 @@ impl Subnet {
 
 fn main() {
     let addr = Ipv4Addr::new(10, 0, 5, 77);
-    let subnet = match Subnet::new(addr, 22) {
+    let subnet = match Subnet::new(addr, 33) {
         Err(msg) => {
             println!("Fehler: {msg}");
             return;
@@ -88,16 +88,63 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    // 22 //
     #[test]
-    fn last_host() {
+    fn prefix_22_first_host() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        assert_eq!(
+            Ipv4Addr::new(10, 0, 4, 1),
+            subnet.expect("First Host /22").first_host()
+        );
+    }
+    #[test]
+    fn prefix_22_last_host() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 22);
         assert_eq!(
             Ipv4Addr::new(10, 0, 7, 254),
-            subnet.expect("LAsst Host /22").last_host()
+            subnet.expect("Last Host /22").last_host()
         );
     }
+    #[test]
+    fn prefix_22_broadcast() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        assert_eq!(
+            Ipv4Addr::new(10, 0, 7, 255).to_bits(),
+            subnet
+                .expect("Broadcast /22")
+                .broadcast()
+                .expect("Broadcast /22")
+        );
+    }
+    #[test]
+    fn prefix_22_subnet_mask() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 252, 0).to_bits(),
+            Subnet::subnet_mask(subnet.unwrap().prefix)
+        );
+    }
+    #[test]
+    fn prefix_22_netadress() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        assert_eq!(
+            Ipv4Addr::new(10, 0, 4, 0).to_bits(),
+            subnet.unwrap().net_addr
+        );
+    }
+    #[test]
+    fn prefix_22_total_hosts() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        assert_eq!(1022, subnet.expect("Total Hosts /22").total_hosts());
+    }
+
+    // 0 //
 
     #[test]
     fn prefix_0_first_host() {
@@ -139,6 +186,15 @@ mod tests {
         );
     }
     #[test]
+    fn prefix_0_netadress() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 0);
+        assert_eq!(
+            Ipv4Addr::new(0, 0, 0, 0).to_bits(),
+            subnet.unwrap().net_addr
+        );
+    }
+    #[test]
     fn prefix_0_total_hosts() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 0);
@@ -169,7 +225,7 @@ mod tests {
     fn prefix_31_broadcast() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 31);
-        assert_eq!(None, subnet.expect("Broadcast /0").broadcast());
+        assert_eq!(None, subnet.expect("Broadcast /31").broadcast());
     }
     #[test]
     fn prefix_31_subnet_mask() {
@@ -178,6 +234,15 @@ mod tests {
         assert_eq!(
             Ipv4Addr::new(255, 255, 255, 254).to_bits(),
             Subnet::subnet_mask(subnet.unwrap().prefix)
+        );
+    }
+    #[test]
+    fn prefix_31_netadress() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 31);
+        assert_eq!(
+            Ipv4Addr::new(10, 0, 5, 76).to_bits(),
+            subnet.unwrap().net_addr
         );
     }
     #[test]
@@ -211,7 +276,7 @@ mod tests {
     fn prefix_32_broadcast() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 32);
-        assert_eq!(None, subnet.expect("Broadcast /0").broadcast());
+        assert_eq!(None, subnet.expect("Broadcast /32").broadcast());
     }
     #[test]
     fn prefix_32_subnet_mask() {
@@ -223,9 +288,135 @@ mod tests {
         );
     }
     #[test]
+    fn prefix_32_netadress() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(10, 0, 5, 77).to_bits(),
+            subnet.unwrap().net_addr
+        );
+    }
+    #[test]
     fn prefix_32_total_hosts() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 32);
-        assert_eq!(1, subnet.expect("Total Hosts /31").total_hosts());
+        assert_eq!(1, subnet.expect("Total Hosts /32").total_hosts());
+    }
+
+    // 32 0.0.0.0
+
+    #[test]
+    fn prefix_32_first_host_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(0, 0, 0, 0),
+            subnet.expect("First Host /32").first_host()
+        );
+    }
+    #[test]
+    fn prefix_32_last_host_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(0, 0, 0, 0),
+            subnet.expect("Last Host /32").last_host()
+        );
+    }
+    #[test]
+    fn prefix_32_broadcast_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(None, subnet.expect("Broadcast /32").broadcast());
+    }
+    #[test]
+    fn prefix_32_subnet_mask_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
+            Subnet::subnet_mask(subnet.unwrap().prefix)
+        );
+    }
+    #[test]
+    fn prefix_32_netadress_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(0, 0, 0, 0).to_bits(),
+            subnet.unwrap().net_addr
+        );
+    }
+    #[test]
+    fn prefix_32_total_hosts_0000() {
+        let addr = Ipv4Addr::new(0, 0, 0, 0);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(1, subnet.expect("Total Hosts /32").total_hosts());
+    }
+
+    // 32 255.255.255.255
+    #[test]
+    fn prefix_32_first_host_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 255, 255),
+            subnet.expect("First Host /32").first_host()
+        );
+    }
+    #[test]
+    fn prefix_32_last_host_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 255, 255),
+            subnet.expect("Last Host /32").last_host()
+        );
+    }
+    #[test]
+    fn prefix_32_broadcast_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(None, subnet.expect("Broadcast /32").broadcast());
+    }
+    #[test]
+    fn prefix_32_subnet_mask_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
+            Subnet::subnet_mask(subnet.unwrap().prefix)
+        );
+    }
+    #[test]
+    fn prefix_32_netadress_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(
+            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
+            subnet.unwrap().net_addr
+        );
+    }
+    #[test]
+    fn prefix_32_total_hosts_255() {
+        let addr = Ipv4Addr::new(255, 255, 255, 255);
+        let subnet = Subnet::new(addr, 32);
+        assert_eq!(1, subnet.expect("Total Hosts /32").total_hosts());
+    }
+
+    // Other //
+    #[test]
+    fn prefix_22_diff_ip_same_net_adress() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 22);
+        let addr2 = Ipv4Addr::new(10, 0, 4, 0);
+        let subnet2 = Subnet::new(addr2, 22);
+        assert_eq!(subnet2.unwrap().net_addr, subnet.unwrap().net_addr);
+    }
+    #[test]
+    fn prefix_33_err() {
+        let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = Subnet::new(addr, 33);
+        assert!(subnet.is_err());
     }
 }
