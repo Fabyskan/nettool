@@ -40,7 +40,7 @@ impl Subnet {
         } else if self.prefix == 32 {
             Ipv4Addr::from_bits(self.net_addr)
         } else {
-            Ipv4Addr::from_bits(self.net_addr | !Self::subnet_mask(self.prefix))
+            Ipv4Addr::from_bits(self.net_addr | (!Self::subnet_mask(self.prefix) - 1))
         }
     }
     fn total_hosts(&self) -> u32 {
@@ -79,7 +79,7 @@ fn main() {
     println!("Last Host: {}", subnet.last_host());
     match subnet.broadcast() {
         Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
-        None => println!("None!"),
+        None => println!("No broadcast defined!"),
     };
     println!("IPv4: {addr}");
     println!("Anzahl Hosts: {}", subnet.total_hosts());
