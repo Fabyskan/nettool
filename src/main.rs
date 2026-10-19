@@ -6,9 +6,12 @@ struct Subnet {
     prefix: u8,
 }
 impl Subnet {
-    fn new(ip: Ipv4Addr, prefix: u8) -> Self {
+    fn new(ip: Ipv4Addr, prefix: u8) -> Result<Self, String> {
+        if !(0..=32).contains(&prefix) {
+            return Err(String::from("Only values between 0 and 32 allowed!"));
+        }
         let net_addr = Self::subnet_mask(prefix) & ip.to_bits();
-        Self { net_addr, prefix }
+        Ok(Self { net_addr, prefix })
     }
     fn subnet_mask(prefix: u8) -> u32 {
         if prefix != 0 {
@@ -33,22 +36,28 @@ impl Subnet {
 
 fn main() {
     let addr = Ipv4Addr::new(10, 0, 5, 77);
+    let subnet1 = match Subnet::new(addr, 33) {
+        Err(msg) => {
+            println!("Fehler: {msg}");
+            return;
+        }
+        Ok(prefix) => prefix,
+    };
 
-    let addr1 = Subnet::new(addr, 22);
-
-    println!("Prefix: {}", addr1.prefix);
-    println!("Netzadresse: {}", Ipv4Addr::from_bits(addr1.net_addr));
+    // PRINTBLOCK //
+    println!("Prefix: {}", subnet1.prefix);
+    println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet1.net_addr));
     println!(
         "Subnetzmaske: {}",
-        Ipv4Addr::from_bits(Subnet::subnet_mask(22))
+        Ipv4Addr::from_bits(Subnet::subnet_mask(subnet1.prefix))
     );
-    println!("Subnetzmaske binary: {:032b}", Subnet::subnet_mask(22));
-    println!("First Host: {}", addr1.first_host());
-    println!("Last Host: {}", addr1.last_host());
     println!(
-        "Broadcast aus Struct: {}",
-        Ipv4Addr::from_bits(Subnet::broadcast(&addr1))
+        "Subnetzmaske binary: {:032b}",
+        Subnet::subnet_mask(subnet1.prefix)
     );
+    println!("First Host: {}", subnet1.first_host());
+    println!("Last Host: {}", subnet1.last_host());
+    println!("Broadcast: {}", Ipv4Addr::from_bits(subnet1.broadcast()));
     println!("IPv4: {addr}");
-    println!("Anzahl Hosts: {}", addr1.total_hosts());
+    println!("Anzahl Hosts: {}", subnet1.total_hosts());
 }
