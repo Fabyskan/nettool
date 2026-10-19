@@ -20,44 +20,67 @@ impl Subnet {
             0
         }
     }
-    fn broadcast(&self) -> u32 {
-        !Self::subnet_mask(self.prefix) | self.net_addr
+    fn broadcast(&self) -> Option<u32> {
+        if self.prefix >= 31 {
+            None
+        } else {
+            Some(!Self::subnet_mask(self.prefix) | self.net_addr)
+        }
     }
     fn first_host(&self) -> Ipv4Addr {
-        Ipv4Addr::from_bits(self.net_addr + 1)
+        if self.broadcast().is_none() {
+            Ipv4Addr::from_bits(self.net_addr)
+        } else {
+            Ipv4Addr::from_bits(self.net_addr + 1)
+        }
     }
     fn last_host(&self) -> Ipv4Addr {
-        Ipv4Addr::from_bits(self.broadcast() - 1)
+        if self.prefix == 31 {
+            Ipv4Addr::from_bits(self.net_addr + 1)
+        } else if self.prefix == 32 {
+            Ipv4Addr::from_bits(self.net_addr)
+        } else {
+            Ipv4Addr::from_bits(self.net_addr | !Self::subnet_mask(self.prefix))
+        }
     }
     fn total_hosts(&self) -> u32 {
-        !Self::subnet_mask(self.prefix) - 1
+        if self.prefix == 31 {
+            2
+        } else if self.prefix == 32 {
+            1
+        } else {
+            !Self::subnet_mask(self.prefix) - 1
+        }
     }
 }
 
 fn main() {
     let addr = Ipv4Addr::new(10, 0, 5, 77);
-    let subnet1 = match Subnet::new(addr, 33) {
+    let subnet = match Subnet::new(addr, 22) {
         Err(msg) => {
             println!("Fehler: {msg}");
             return;
         }
-        Ok(prefix) => prefix,
+        Ok(subnet) => subnet,
     };
 
     // PRINTBLOCK //
-    println!("Prefix: {}", subnet1.prefix);
-    println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet1.net_addr));
+    println!("Prefix: {}", subnet.prefix);
+    println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet.net_addr));
     println!(
         "Subnetzmaske: {}",
-        Ipv4Addr::from_bits(Subnet::subnet_mask(subnet1.prefix))
+        Ipv4Addr::from_bits(Subnet::subnet_mask(subnet.prefix))
     );
     println!(
         "Subnetzmaske binary: {:032b}",
-        Subnet::subnet_mask(subnet1.prefix)
+        Subnet::subnet_mask(subnet.prefix)
     );
-    println!("First Host: {}", subnet1.first_host());
-    println!("Last Host: {}", subnet1.last_host());
-    println!("Broadcast: {}", Ipv4Addr::from_bits(subnet1.broadcast()));
+    println!("First Host: {}", subnet.first_host());
+    println!("Last Host: {}", subnet.last_host());
+    match subnet.broadcast() {
+        Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
+        None => println!("None!"),
+    };
     println!("IPv4: {addr}");
-    println!("Anzahl Hosts: {}", subnet1.total_hosts());
+    println!("Anzahl Hosts: {}", subnet.total_hosts());
 }
