@@ -57,72 +57,62 @@ impl Subnet {
     }
     fn from_cidr(input: &str) -> Result<Subnet, String> {
         match input.split_once('/') {
-            Some(input) => {
-                let (ip, prefix) = input;
+            Some((ip, prefix)) => {
                 let ip = match ip.trim().parse() {
                     Ok(ip) => ip,
                     Err(_) => {
-                        return Err(String::from("Wrong IP input! Consider xxx.xxx.xxx.xxx/xx "));
+                        return Err(String::from("Wrong IP input! Consider 10.0.5.77/22"));
                     }
                 };
                 let prefix = match prefix.trim().parse() {
                     Ok(prefix) => prefix,
                     Err(_) => {
-                        return Err(String::from(
-                            "Wrong prefix input! Consider xxx.xxx.xxx.xxx/xx ",
-                        ));
+                        return Err(String::from("Wrong prefix input! Consider 10.0.5.77/22"));
                     }
                 };
                 Self::new(ip, prefix)
             }
-            None => Err(String::from("Wrong input! Consider xxx.xxx.xxx.xxx/xx ")),
+            None => Err(String::from("Wrong input! Consider 10.0.5.77/22")),
         }
     }
 }
+fn take_input() -> String {
+    println!("Please input your IP in CIDR.");
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    input
+}
+
+fn printer(subnet: &Subnet) {
+    println!("Prefix: {}", subnet.prefix);
+    println!("Netaddress: {}", Ipv4Addr::from_bits(subnet.net_addr));
+    println!(
+        "Subnet Mask: {}",
+        Ipv4Addr::from_bits(Subnet::subnet_mask(subnet.prefix))
+    );
+    println!("First Host: {}", subnet.first_host());
+    println!("Last Host: {}", subnet.last_host());
+    match subnet.broadcast() {
+        Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
+        None => println!("No broadcast defined!"),
+    };
+
+    println!("Total Hosts: {}", subnet.total_hosts());
+}
 
 fn main() {
-    /*     let addr = Ipv4Addr::new(10, 0, 5, 77);
-        let subnet = match Subnet::new(addr, 22) {
-            Err(msg) => {
-                println!("Fehler: {msg}");
-                return;
-            }
-            Ok(subnet) => subnet,
-        };
-    */
     loop {
-        println!("Please input your IP in CIDR.");
-        let mut input = String::new();
-
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-        let subnet = match Subnet::from_cidr(&input) {
+        let subnet = match Subnet::from_cidr(&take_input()) {
             Err(e) => {
-                println!("{}", e);
+                println!("{e}");
                 continue;
             }
             Ok(subnet) => subnet,
         };
-
-        println!("Prefix: {}", subnet.prefix);
-        println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet.net_addr));
-        println!(
-            "Subnetzmaske: {}",
-            Ipv4Addr::from_bits(Subnet::subnet_mask(subnet.prefix))
-        );
-        println!(
-            "Subnetzmaske binary: {:032b}",
-            Subnet::subnet_mask(subnet.prefix)
-        );
-        println!("First Host: {}", subnet.first_host());
-        println!("Last Host: {}", subnet.last_host());
-        match subnet.broadcast() {
-            Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
-            None => println!("No broadcast defined!"),
-        };
-        println!("IPv4: {}", input.trim());
-        println!("Anzahl Hosts: {}", subnet.total_hosts());
+        printer(&subnet);
         break;
     }
 }
@@ -365,6 +355,82 @@ mod tests {
     fn prefix_33_err() {
         let addr = Ipv4Addr::new(10, 0, 5, 77);
         let subnet = Subnet::new(addr, 33);
+        assert!(subnet.is_err());
+    }
+
+    // Eingabetests
+
+    #[test]
+    fn from_cidr_normal() {
+        let subnet = Subnet::from_cidr("10.0.5.77/22");
+        assert!(subnet.is_ok());
+    }
+
+    #[test]
+    fn from_cidr_newline() {
+        let subnet = Subnet::from_cidr("10.0.5.77/22\n");
+        assert!(subnet.is_ok());
+    }
+
+    #[test]
+    fn from_cidr_no_prefix_no_slash() {
+        let subnet = Subnet::from_cidr("10.0.5.77");
+        assert!(subnet.is_err());
+    }
+
+    #[test]
+    fn from_cidr_normal_no_prefix() {
+        let subnet = Subnet::from_cidr("10.0.5.77/");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_no_ip() {
+        let subnet = Subnet::from_cidr("/22");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_no_input() {
+        let subnet = Subnet::from_cidr("");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_gibberish() {
+        let subnet = Subnet::from_cidr("gsdrtashfd");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_more_slashes() {
+        let subnet = Subnet::from_cidr("10/0/5/77/22");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_octal_too_big() {
+        let subnet = Subnet::from_cidr("10.0.5.256/22");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_leading_zero() {
+        let subnet = Subnet::from_cidr("10.0.5.077/22");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_prefix_out_of_range() {
+        let subnet = Subnet::from_cidr("10.0.5.77/789");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_prefix_out_of_scope() {
+        let subnet = Subnet::from_cidr("10.0.5.77/33");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_prefix_negative() {
+        let subnet = Subnet::from_cidr("10.0.5.77/-1");
+        assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_mask_instead_of_prefix() {
+        let subnet = Subnet::from_cidr("10.0.5.77/255.255.252.0");
         assert!(subnet.is_err());
     }
 }
