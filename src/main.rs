@@ -1,3 +1,4 @@
+use std::io;
 use std::net::Ipv4Addr;
 
 #[derive(Debug)]
@@ -52,37 +53,64 @@ impl Subnet {
             !Self::subnet_mask(self.prefix) - 1
         }
     }
+    fn from_cidr(str: &str) -> Result<Subnet, String> {
+        match str.split_once('/') {
+            Some(input) => {
+                let (ip, prefix) = input;
+                let ip = ip.trim().parse().expect("IP Parse");
+                let prefix = prefix.trim().parse().expect("Prefix Parse");
+                Ok(Self::new(ip, prefix).expect("Call to new from_cidr"))
+            }
+            None => Err(String::from("Received None in parsing")),
+        }
+    }
 }
 
 fn main() {
-    let addr = Ipv4Addr::new(10, 0, 5, 77);
-    let subnet = match Subnet::new(addr, 22) {
-        Err(msg) => {
-            println!("Fehler: {msg}");
-            return;
-        }
-        Ok(subnet) => subnet,
-    };
+    /*     let addr = Ipv4Addr::new(10, 0, 5, 77);
+        let subnet = match Subnet::new(addr, 22) {
+            Err(msg) => {
+                println!("Fehler: {msg}");
+                return;
+            }
+            Ok(subnet) => subnet,
+        };
+    */
+    loop {
+        println!("Please input your IP in CIDR.");
+        let mut input = String::new();
 
-    // PRINTBLOCK //
-    println!("Prefix: {}", subnet.prefix);
-    println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet.net_addr));
-    println!(
-        "Subnetzmaske: {}",
-        Ipv4Addr::from_bits(Subnet::subnet_mask(subnet.prefix))
-    );
-    println!(
-        "Subnetzmaske binary: {:032b}",
-        Subnet::subnet_mask(subnet.prefix)
-    );
-    println!("First Host: {}", subnet.first_host());
-    println!("Last Host: {}", subnet.last_host());
-    match subnet.broadcast() {
-        Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
-        None => println!("No broadcast defined!"),
-    };
-    println!("IPv4: {addr}");
-    println!("Anzahl Hosts: {}", subnet.total_hosts());
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+        let subnet = match Subnet::from_cidr(&input) {
+            Err(_) => {
+                println!("Wrong input! Consider xxx.xxx.xxx.xxx/xx ");
+                continue;
+            }
+            Ok(subnet) => subnet,
+        };
+
+        println!("Prefix: {}", subnet.prefix);
+        println!("Netzadresse: {}", Ipv4Addr::from_bits(subnet.net_addr));
+        println!(
+            "Subnetzmaske: {}",
+            Ipv4Addr::from_bits(Subnet::subnet_mask(subnet.prefix))
+        );
+        println!(
+            "Subnetzmaske binary: {:032b}",
+            Subnet::subnet_mask(subnet.prefix)
+        );
+        println!("First Host: {}", subnet.first_host());
+        println!("Last Host: {}", subnet.last_host());
+        match subnet.broadcast() {
+            Some(broadcast) => println!("Broadcast: {}", Ipv4Addr::from_bits(broadcast)),
+            None => println!("No broadcast defined!"),
+        };
+        println!("IPv4: {}", input.trim());
+        println!("Anzahl Hosts: {}", subnet.total_hosts());
+        break;
+    }
 }
 
 #[cfg(test)]
@@ -120,7 +148,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_22_net_addresss() {
+    fn prefix_22_net_address() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
         assert_eq!(Ipv4Addr::new(10, 0, 4, 0).to_bits(), subnet.net_addr);
     }
@@ -159,7 +187,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_0_net_addresss() {
+    fn prefix_0_net_address() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 0);
         assert_eq!(Ipv4Addr::new(0, 0, 0, 0).to_bits(), subnet.net_addr);
     }
@@ -195,7 +223,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_31_net_addresss() {
+    fn prefix_31_net_address() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 31);
         assert_eq!(Ipv4Addr::new(10, 0, 5, 76).to_bits(), subnet.net_addr);
     }
@@ -231,7 +259,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_addresss() {
+    fn prefix_32_net_address() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 32);
         assert_eq!(Ipv4Addr::new(10, 0, 5, 77).to_bits(), subnet.net_addr);
     }
@@ -267,7 +295,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_addresss_0000() {
+    fn prefix_32_net_address_0000() {
         let subnet = subnet_create(Ipv4Addr::new(0, 0, 0, 0), 32);
         assert_eq!(Ipv4Addr::new(0, 0, 0, 0).to_bits(), subnet.net_addr);
     }
@@ -302,7 +330,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_addresss_255() {
+    fn prefix_32_net_address_255() {
         let subnet = subnet_create(Ipv4Addr::new(255, 255, 255, 255), 32);
         assert_eq!(Ipv4Addr::new(255, 255, 255, 255).to_bits(), subnet.net_addr);
     }
@@ -314,7 +342,7 @@ mod tests {
 
     // Other //
     #[test]
-    fn prefix_22_diff_ip_same_net_addresss() {
+    fn prefix_22_diff_ip_same_net_address() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
         let subnet2 = subnet_create(Ipv4Addr::new(10, 0, 4, 0), 22);
         assert_eq!(subnet2.net_addr, subnet.net_addr);
