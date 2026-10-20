@@ -9,7 +9,9 @@ struct Subnet {
 impl Subnet {
     fn new(ip: Ipv4Addr, prefix: u8) -> Result<Self, String> {
         if !(0..=32).contains(&prefix) {
-            return Err(String::from("Only values between 0 and 32 allowed!"));
+            return Err(String::from(
+                "For prefix only values between 0 and 32 allowed!",
+            ));
         }
         let net_addr = Self::subnet_mask(prefix) & ip.to_bits();
         Ok(Self { net_addr, prefix })
@@ -53,15 +55,27 @@ impl Subnet {
             !Self::subnet_mask(self.prefix) - 1
         }
     }
-    fn from_cidr(str: &str) -> Result<Subnet, String> {
-        match str.split_once('/') {
+    fn from_cidr(input: &str) -> Result<Subnet, String> {
+        match input.split_once('/') {
             Some(input) => {
                 let (ip, prefix) = input;
-                let ip = ip.trim().parse().expect("IP Parse");
-                let prefix = prefix.trim().parse().expect("Prefix Parse");
-                Ok(Self::new(ip, prefix).expect("Call to new from_cidr"))
+                let ip = match ip.trim().parse() {
+                    Ok(ip) => ip,
+                    Err(_) => {
+                        return Err(String::from("Wrong IP input! Consider xxx.xxx.xxx.xxx/xx "));
+                    }
+                };
+                let prefix = match prefix.trim().parse() {
+                    Ok(prefix) => prefix,
+                    Err(_) => {
+                        return Err(String::from(
+                            "Wrong prefix input! Consider xxx.xxx.xxx.xxx/xx ",
+                        ));
+                    }
+                };
+                Self::new(ip, prefix)
             }
-            None => Err(String::from("Received None in parsing")),
+            None => Err(String::from("Wrong input! Consider xxx.xxx.xxx.xxx/xx ")),
         }
     }
 }
@@ -84,8 +98,8 @@ fn main() {
             .read_line(&mut input)
             .expect("Failed to read line");
         let subnet = match Subnet::from_cidr(&input) {
-            Err(_) => {
-                println!("Wrong input! Consider xxx.xxx.xxx.xxx/xx ");
+            Err(e) => {
+                println!("{}", e);
                 continue;
             }
             Ok(subnet) => subnet,
