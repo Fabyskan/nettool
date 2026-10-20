@@ -5,8 +5,8 @@ pub struct Subnet {
     prefix: u8,
 }
 impl Subnet {
-    pub fn net_addr(&self) -> u32 {
-        self.net_addr
+    pub fn net_addr(&self) -> Ipv4Addr {
+        Ipv4Addr::from_bits(self.net_addr)
     }
     pub fn prefix(&self) -> u8 {
         self.prefix
@@ -29,15 +29,17 @@ impl Subnet {
             0
         }
     }
-    pub fn broadcast(&self) -> Option<u32> {
+    pub fn broadcast(&self) -> Option<Ipv4Addr> {
         if self.prefix >= 31 {
             None
         } else {
-            Some(!Self::subnet_mask(self.prefix) | self.net_addr)
+            Some(Ipv4Addr::from_bits(
+                !Self::subnet_mask(self.prefix) | self.net_addr,
+            ))
         }
     }
     pub fn mask(&self) -> Ipv4Addr {
-        Ipv4Addr::from_bits(Subnet::subnet_mask(self.prefix))
+        Ipv4Addr::from_bits(Self::subnet_mask(self.prefix))
     }
     pub fn first_host(&self) -> Ipv4Addr {
         if self.prefix == 31 || self.prefix == 32 {
@@ -107,17 +109,14 @@ mod tests {
     fn prefix_22_broadcast() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
         assert_eq!(
-            Ipv4Addr::new(10, 0, 7, 255).to_bits(),
+            Ipv4Addr::new(10, 0, 7, 255),
             subnet.broadcast().expect("Broadcast /22")
         );
     }
     #[test]
     fn prefix_22_subnet_mask() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
-        assert_eq!(
-            Ipv4Addr::new(255, 255, 252, 0).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(255, 255, 252, 0), subnet.mask());
     }
     #[test]
     fn prefix_22_net_address() {
@@ -146,17 +145,14 @@ mod tests {
     fn prefix_0_broadcast() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 0);
         assert_eq!(
-            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
+            Ipv4Addr::new(255, 255, 255, 255),
             subnet.broadcast().expect("Broadcast /0")
         );
     }
     #[test]
     fn prefix_0_subnet_mask() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 0);
-        assert_eq!(
-            Ipv4Addr::new(0, 0, 0, 0).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(0, 0, 0, 0), subnet.mask());
     }
     #[test]
     fn prefix_0_net_address() {
@@ -189,10 +185,7 @@ mod tests {
     #[test]
     fn prefix_31_subnet_mask() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 31);
-        assert_eq!(
-            Ipv4Addr::new(255, 255, 255, 254).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(255, 255, 255, 254), subnet.mask());
     }
     #[test]
     fn prefix_31_net_address() {
@@ -225,10 +218,7 @@ mod tests {
     #[test]
     fn prefix_32_subnet_mask() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 32);
-        assert_eq!(
-            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(255, 255, 255, 255), subnet.mask());
     }
     #[test]
     fn prefix_32_net_address() {
@@ -261,10 +251,7 @@ mod tests {
     #[test]
     fn prefix_32_subnet_mask_0000() {
         let subnet = subnet_create(Ipv4Addr::new(0, 0, 0, 0), 32);
-        assert_eq!(
-            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(255, 255, 255, 255), subnet.mask());
     }
     #[test]
     fn prefix_32_net_address_0000() {
@@ -296,10 +283,7 @@ mod tests {
     #[test]
     fn prefix_32_subnet_mask_255() {
         let subnet = subnet_create(Ipv4Addr::new(255, 255, 255, 255), 32);
-        assert_eq!(
-            Ipv4Addr::new(255, 255, 255, 255).to_bits(),
-            Subnet::subnet_mask(subnet.prefix)
-        );
+        assert_eq!(Ipv4Addr::new(255, 255, 255, 255), subnet.mask());
     }
     #[test]
     fn prefix_32_net_address_255() {
