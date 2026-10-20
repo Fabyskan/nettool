@@ -89,7 +89,7 @@ fn main() {
 mod tests {
     use super::*;
     fn subnet_create(ip: Ipv4Addr, prefix: u8) -> Subnet {
-        Subnet::new(ip, prefix).expect("TEstdaten müssen gültig sein.")
+        Subnet::new(ip, prefix).expect("Testdaten müssen gültig sein.")
     }
 
     // 22 //
@@ -120,7 +120,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_22_net_adress() {
+    fn prefix_22_net_addresss() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
         assert_eq!(Ipv4Addr::new(10, 0, 4, 0).to_bits(), subnet.net_addr);
     }
@@ -159,7 +159,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_0_net_adress() {
+    fn prefix_0_net_addresss() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 0);
         assert_eq!(Ipv4Addr::new(0, 0, 0, 0).to_bits(), subnet.net_addr);
     }
@@ -195,7 +195,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_31_net_adress() {
+    fn prefix_31_net_addresss() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 31);
         assert_eq!(Ipv4Addr::new(10, 0, 5, 76).to_bits(), subnet.net_addr);
     }
@@ -231,7 +231,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_adress() {
+    fn prefix_32_net_addresss() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 32);
         assert_eq!(Ipv4Addr::new(10, 0, 5, 77).to_bits(), subnet.net_addr);
     }
@@ -267,7 +267,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_adress_0000() {
+    fn prefix_32_net_addresss_0000() {
         let subnet = subnet_create(Ipv4Addr::new(0, 0, 0, 0), 32);
         assert_eq!(Ipv4Addr::new(0, 0, 0, 0).to_bits(), subnet.net_addr);
     }
@@ -302,7 +302,7 @@ mod tests {
         );
     }
     #[test]
-    fn prefix_32_net_adress_255() {
+    fn prefix_32_net_addresss_255() {
         let subnet = subnet_create(Ipv4Addr::new(255, 255, 255, 255), 32);
         assert_eq!(Ipv4Addr::new(255, 255, 255, 255).to_bits(), subnet.net_addr);
     }
@@ -314,7 +314,7 @@ mod tests {
 
     // Other //
     #[test]
-    fn prefix_22_diff_ip_same_net_adress() {
+    fn prefix_22_diff_ip_same_net_addresss() {
         let subnet = subnet_create(Ipv4Addr::new(10, 0, 5, 77), 22);
         let subnet2 = subnet_create(Ipv4Addr::new(10, 0, 4, 0), 22);
         assert_eq!(subnet2.net_addr, subnet.net_addr);
