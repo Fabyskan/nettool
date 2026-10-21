@@ -67,24 +67,19 @@ impl Subnet {
         }
     }
     pub fn from_cidr(input: &str) -> Result<Subnet, String> {
-        match input.split_once('/') {
-            Some((ip, prefix)) => {
-                let ip = match ip.trim().parse() {
-                    Ok(ip) => ip,
-                    Err(_) => {
-                        return Err(String::from("Wrong IP input! Consider 10.0.5.77/22"));
-                    }
-                };
-                let prefix = match prefix.trim().parse() {
-                    Ok(prefix) => prefix,
-                    Err(_) => {
-                        return Err(String::from("Wrong prefix input! Consider 10.0.5.77/22"));
-                    }
-                };
-                Self::new(ip, prefix)
-            }
-            None => Err(String::from("Wrong input! Consider 10.0.5.77/22")),
-        }
+        let (ip, prefix) = input
+            .split_once('/')
+            .ok_or("Wrong input! Consider 10.0.5.77/22")
+            .map_err(|_| "Wrong input! Consider 10.0.5.77/22")?;
+        let ip: Ipv4Addr = ip
+            .trim()
+            .parse()
+            .map_err(|_| "Wrong IP input! Consider 10.0.5.77/22")?;
+        let prefix: u8 = prefix
+            .trim()
+            .parse()
+            .map_err(|_| "Wrong prefix input! Consider 10.0.5.77/22")?;
+        Self::new(ip, prefix)
     }
 }
 #[cfg(test)]
