@@ -1,3 +1,4 @@
+use crate::InputArguments;
 use std::net::Ipv4Addr;
 #[derive(Debug)]
 pub struct Subnet {
@@ -80,6 +81,41 @@ impl Subnet {
             .map_err(|_| "Wrong prefix input! Consider 10.0.5.77/22")?;
         Self::new(ip, prefix)
     }
+    pub fn subcalc(arguments: &InputArguments) {
+        match arguments.argument_len() {
+            0 => {
+                eprintln!("Tool missing Arguments! Consider subcalc [IP CIDR]");
+                std::process::exit(2)
+            }
+            1 => {
+                let subnet = match Subnet::from_cidr(arguments.argument(0)) {
+                    Ok(subnet) => subnet,
+                    Err(e) => {
+                        eprintln!("{e}");
+                        std::process::exit(1);
+                    }
+                };
+                printer(&subnet);
+            }
+            _ => {
+                eprintln!("Too many arguments!");
+                std::process::exit(2)
+            }
+        }
+    }
+}
+fn printer(subnet: &Subnet) {
+    println!("Prefix: {}", subnet.prefix());
+    println!("Netaddress: {}", subnet.net_addr());
+    println!("Subnet Mask: {}", subnet.mask());
+    println!("First Host: {}", subnet.first_host());
+    println!("Last Host: {}", subnet.last_host());
+    match subnet.broadcast() {
+        Some(broadcast) => println!("Broadcast: {}", broadcast),
+        None => println!("No broadcast defined!"),
+    };
+
+    println!("Total Hosts: {}", subnet.total_hosts());
 }
 #[cfg(test)]
 mod tests {

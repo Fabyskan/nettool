@@ -1,6 +1,6 @@
 mod input_control;
 mod subnet;
-use crate::input_control::InputArguments;
+use crate::{input_control::InputArguments, subnet::Subnet};
 use std::env;
 
 fn main() {
@@ -12,15 +12,11 @@ fn main() {
 
     match arguments.tool() {
         "subcalc" => {
-            InputArguments::subcalc(&arguments);
-        }
-        _ if arguments.argument_len() == 0 => {
-            eprint!("Unknown tool choose a provided tool: \nsubcalc\n");
-            std::process::exit(1)
+            Subnet::subcalc(&arguments);
         }
         _ => {
-            eprintln!("Invalid Input!");
-            std::process::exit(2)
+            eprintln!("Unknown tool choose a provided tool: \n- subcalc\n");
+            std::process::exit(1)
         }
     };
 }
