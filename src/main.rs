@@ -1,16 +1,6 @@
 mod subnet;
 use crate::subnet::Subnet;
-use std::io;
-
-fn take_input() -> String {
-    println!("Please input your IP in CIDR.");
-    let mut input = String::new();
-
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    input
-}
+use std::env;
 
 fn printer(subnet: &Subnet) {
     println!("Prefix: {}", subnet.prefix());
@@ -27,15 +17,22 @@ fn printer(subnet: &Subnet) {
 }
 
 fn main() {
-    loop {
-        let subnet = match Subnet::from_cidr(&take_input()) {
-            Err(e) => {
-                println!("{e}");
-                continue;
-            }
-            Ok(subnet) => subnet,
-        };
-        printer(&subnet);
-        break;
-    }
+    let args: Vec<String> = env::args().collect();
+    let tool = &args[1];
+    let argument = &args[2];
+
+    match tool.parse::<String>() {
+        Ok(tool) if tool == "subcalc" => {
+            let subnet = match Subnet::from_cidr(argument) {
+                Ok(subnet) => subnet,
+                Err(e) => {
+                    println!("{e}");
+                    return;
+                }
+            };
+            printer(&subnet);
+        }
+        Ok(_) => (),
+        Err(_) => (),
+    };
 }
