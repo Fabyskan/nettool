@@ -397,12 +397,12 @@ mod tests {
         assert!(subnet.is_err());
     }
     #[test]
-    fn from_cidr_mask_wrong_ip_err_msg() {
+    fn from_cidr_wrong_ip_err_msg() {
         let subnet = Subnet::from_cidr("g/22");
         assert_eq!("Wrong IP input! Consider 10.0.5.77/22", subnet.unwrap_err());
     }
     #[test]
-    fn from_cidr_mask_wrong_prefix_err_msg() {
+    fn from_cidr_wrong_prefix_err_msg() {
         let subnet = Subnet::from_cidr("10.0.5.77/g");
         assert_eq!(
             "Wrong prefix input! Consider 10.0.5.77/22",
@@ -410,7 +410,7 @@ mod tests {
         );
     }
     #[test]
-    fn from_cidr_mask_wrong_input_err_msg() {
+    fn from_cidr_wrong_input_err_msg() {
         let subnet = Subnet::from_cidr("g");
         assert_eq!("Wrong input! Consider 10.0.5.77/22", subnet.unwrap_err());
     }
