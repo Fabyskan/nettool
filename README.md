@@ -17,21 +17,30 @@ Last Host: 10.0.7.254
 Broadcast: 10.0.7.255
 Total Hosts: 1022
 ```
-Wrong input will be handled internally and the program will stop.
-Exit Code 2 on ErrOut for Wrong Input 
+
+
 
 ### Tests ###
 
 Tests are executed with `cargo test` 
 
 ### Error Codes ###
-
+Wrong input will be handled internally and the program will stop.
 
 | Aufruf                               | Verhalten?                                 | Exit-Code | Kanal   |
 | ------------------------------------ | ------------------------------------------ | --------- | ------- |
-| `nettool` (ohne alles)               | Toolauswahl printen                        | 1         | std out |
+| `nettool` (ohne alles)               | Toolauswahl printen                        | 2         | err out |
 | `nettool subcalc 10.0.5.77/22`       | ganz normales ausführen des Rechners       | 0         | std out |
-| `nettool subcalc` (ohne Adresse)     | "Too few arguments" Meldung und abbruch    | 2         | err out |
+| `nettool subcalc` (ohne Adresse)     | "Too missing arguments" Meldung und abbruch| 2         | err out |
 | `nettool subcalc murks`              | Wrong input Meldung und abbruch            | 2         | err out |
-| `nettool quatsch`                    | "Tool is not provided" Meldung und abbruch | 2         | err out |
+| `nettool quatsch`                    | "Unknown Tool" Toolauswhahl print & abbruch| 2         | err out |
 | `nettool subcalc 10.0.5.77/22 extra` | "Too many arguments" Meldung und abbruch   | 2         | err out |
+
+```
+cargo run --  ; echo $?
+cargo run -- subcalc 10.0.5.77/22; echo $?
+cargo run -- subcalc ; echo $?
+cargo run -- subcalc murks ; echo $?
+cargo run -- quatsch ; echo $?
+cargo run -- subcalc 10.0.5.77/22 extra; echo $?
+```
