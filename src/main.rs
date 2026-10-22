@@ -15,24 +15,42 @@ fn printer(subnet: &Subnet) {
 
     println!("Total Hosts: {}", subnet.total_hosts());
 }
+struct InputArguments {
+    tool: String,
+    argument: String,
+}
+impl InputArguments {
+    fn new(args: &[String]) -> Result<InputArguments, &'static str> {
+        if args.len() < 3 {
+            return Err("Too few arguments!");
+        }
+        if args.len() > 3 {
+            return Err("Too many arguments!");
+        }
+        let tool = args[1].clone();
+        let argument = args[2].clone();
+        Ok(InputArguments { tool, argument })
+    }
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let tool = &args[1];
-    let argument = &args[2];
+    let arguments = InputArguments::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        std::process::exit(1);
+    });
 
-    match tool.parse::<String>() {
-        Ok(tool) if tool == "subcalc" => {
-            let subnet = match Subnet::from_cidr(argument) {
+    match arguments.tool.as_str() {
+        "subcalc" => {
+            let subnet = match Subnet::from_cidr(&arguments.argument) {
                 Ok(subnet) => subnet,
                 Err(e) => {
-                    println!("{e}");
-                    return;
+                    eprintln!("{e}");
+                    std::process::exit(2);
                 }
             };
             printer(&subnet);
         }
-        Ok(_) => (),
-        Err(_) => (),
+        _ => eprintln!("Unknown Tool!"),
     };
 }

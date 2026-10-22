@@ -2,9 +2,9 @@
 The program takes an IPv4 address in CIDR format and computes, mask, first host, last host, broadcast, net address and total hosts.
 
 ### How to Use ###
-Start the program via `cargo run -- [TOOL] [ARGUEMENT]`
+Start the program via `cargo run -- [TOOL] [ARGUMENT]`
 
-At teh moment only 'subcalc' ist available as a tool. It takes the IP in CIDR as Arguement.
+At the moment only `subcalc` is available as a tool. It takes the IP in CIDR as Argument.
 
 For example: `cargo run -- subcalc 10.0.5.77/22`
 Output:
@@ -23,3 +23,15 @@ Exit Code 2 on ErrOut for Wrong Input
 ### Tests ###
 
 Tests are executed with `cargo test` 
+
+### Error Codes ###
+
+
+| Aufruf                               | Verhalten?                                 | Exit-Code | Kanal   |
+| ------------------------------------ | ------------------------------------------ | --------- | ------- |
+| `nettool` (ohne alles)               | Toolauswahl printen                        | 1         | std out |
+| `nettool subcalc 10.0.5.77/22`       | ganz normales ausführen des Rechners       | 0         | std out |
+| `nettool subcalc` (ohne Adresse)     | "Too few arguments" Meldung und abbruch    | 2         | err out |
+| `nettool subcalc murks`              | Wrong input Meldung und abbruch            | 2         | err out |
+| `nettool quatsch`                    | "Tool is not provided" Meldung und abbruch | 2         | err out |
+| `nettool subcalc 10.0.5.77/22 extra` | "Too many arguments" Meldung und abbruch   | 2         | err out |
