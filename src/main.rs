@@ -26,19 +26,27 @@ fn main() {
     });
 
     match arguments.tool() {
-        "subcalc" => {
-            let subnet = match Subnet::from_cidr(&arguments.argument(0)) {
+        "subcalc" if InputArguments::argument_len(&arguments) == 1 => {
+            let subnet = match Subnet::from_cidr(arguments.argument(0)) {
                 Ok(subnet) => subnet,
                 Err(e) => {
                     eprintln!("{e}");
-                    std::process::exit(2);
+                    std::process::exit(1);
                 }
             };
             printer(&subnet);
         }
-        _ => {
-            eprintln!("Unknown Tool!");
+        "subcalc" if InputArguments::argument_len(&arguments) == 0 => {
+            eprintln!("Tool missing Arguments! Consider subcalc [IP CIDR]");
+            std::process::exit(2)
+        }
+        _ if InputArguments::argument_len(&arguments) == 0 => {
+            eprint!("Unknown tool choose a provided tool: \nsubcalc\n");
             std::process::exit(1)
+        }
+        _ => {
+            eprintln!("Too many arguments!");
+            std::process::exit(2)
         }
     };
 }
