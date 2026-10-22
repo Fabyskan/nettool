@@ -69,8 +69,7 @@ impl Subnet {
     pub fn from_cidr(input: &str) -> Result<Subnet, String> {
         let (ip, prefix) = input
             .split_once('/')
-            .ok_or("Wrong input! Consider 10.0.5.77/22")
-            .map_err(|_| "Wrong input! Consider 10.0.5.77/22")?;
+            .ok_or("Wrong input! Consider 10.0.5.77/22")?;
         let ip: Ipv4Addr = ip
             .trim()
             .parse()
@@ -396,5 +395,23 @@ mod tests {
     fn from_cidr_mask_instead_of_prefix() {
         let subnet = Subnet::from_cidr("10.0.5.77/255.255.252.0");
         assert!(subnet.is_err());
+    }
+    #[test]
+    fn from_cidr_mask_wrong_ip_err_msg() {
+        let subnet = Subnet::from_cidr("g/22");
+        assert_eq!("Wrong IP input! Consider 10.0.5.77/22", subnet.unwrap_err());
+    }
+    #[test]
+    fn from_cidr_mask_wrong_prefix_err_msg() {
+        let subnet = Subnet::from_cidr("10.0.5.77/g");
+        assert_eq!(
+            "Wrong prefix input! Consider 10.0.5.77/22",
+            subnet.unwrap_err()
+        );
+    }
+    #[test]
+    fn from_cidr_mask_wrong_input_err_msg() {
+        let subnet = Subnet::from_cidr("g");
+        assert_eq!("Wrong input! Consider 10.0.5.77/22", subnet.unwrap_err());
     }
 }
