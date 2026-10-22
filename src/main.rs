@@ -1,4 +1,6 @@
+mod input_control;
 mod subnet;
+use crate::input_control::InputArguments;
 use crate::subnet::Subnet;
 use std::env;
 
@@ -15,34 +17,17 @@ fn printer(subnet: &Subnet) {
 
     println!("Total Hosts: {}", subnet.total_hosts());
 }
-struct InputArguments {
-    tool: String,
-    argument: String,
-}
-impl InputArguments {
-    fn new(args: &[String]) -> Result<InputArguments, &'static str> {
-        if args.len() < 3 {
-            return Err("Too few arguments!");
-        }
-        if args.len() > 3 {
-            return Err("Too many arguments!");
-        }
-        let tool = args[1].clone();
-        let argument = args[2].clone();
-        Ok(InputArguments { tool, argument })
-    }
-}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let arguments = InputArguments::new(&args).unwrap_or_else(|err| {
-        println!("Problem parsing arguments: {err}");
-        std::process::exit(1);
+        eprintln!("Problem parsing arguments: {err}");
+        std::process::exit(2);
     });
 
-    match arguments.tool.as_str() {
+    match arguments.tool() {
         "subcalc" => {
-            let subnet = match Subnet::from_cidr(&arguments.argument) {
+            let subnet = match Subnet::from_cidr(&arguments.argument(0)) {
                 Ok(subnet) => subnet,
                 Err(e) => {
                     eprintln!("{e}");
@@ -51,6 +36,9 @@ fn main() {
             };
             printer(&subnet);
         }
-        _ => eprintln!("Unknown Tool!"),
+        _ => {
+            eprintln!("Unknown Tool!");
+            std::process::exit(1)
+        }
     };
 }
