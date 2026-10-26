@@ -52,9 +52,29 @@ pub fn from_mask_input(input: &str) -> Result<u8, String> {
         .trim()
         .parse()
         .map_err(|_| "Wrong mask input! Consider 255.255.252.0")?;
-    let output = Ipv4Addr::to_bits(mask).leading_ones() as u8;
+    let output = mask.to_bits().leading_ones() as u8;
     if Ipv4Addr::from_bits(Subnet::subnet_mask(output)) != mask {
-        Err("Wrong mask input! Consider 255.255.252.0")?;
+        return Err(String::from("Invalid mask! Consider 255.255.252.0"));
     };
     Ok(output)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn from_mask_input_middle_zero_mask() {
+        let mask = "255.0.252.0";
+        assert!(from_mask_input(&mask).is_err());
+    }
+    #[test]
+    fn from_mask_input_normal() {
+        let mask = "255.255.252.0";
+        assert_eq!(from_mask_input(&mask), Ok(22));
+    }
+    #[test]
+    fn from_prefix_input_middle_invalid_prefix() {
+        let prefix = "/33";
+        assert!(from_prefix_input(&prefix).is_err());
+    }
 }

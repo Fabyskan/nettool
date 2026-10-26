@@ -30,7 +30,7 @@ Wrong input will be handled internally and the program will stop.
 
 | Call                                 | Behaviour?                                 | Exit-Code | Channel |
 | ------------------------------------ | ------------------------------------------ | --------- | ------- |
-| `nettool` (empty     )               | print available tools                      | 2         | err out |
+| `nettool` (empty)                    | print available tools                      | 2         | err out |
 | `nettool subcalc 10.0.5.77/22`       | normal execution                           | 0         | std out |
 | `nettool subcalc` (no Argument)      | "Tool missing arguments" & exit            | 2         | err out |
 | `nettool subcalc murks`              | "Wrong input"             & exit           | 2         | err out |
@@ -40,10 +40,10 @@ Wrong input will be handled internally and the program will stop.
 
 | Call                                  | Behaviour?                                 | Exit-Code | Channel |
 | ------------------------------------  | ------------------------------------------ | --------- | ------- |
-| `nettool` (empty     )                | print available tools                      | 2         | err out |
-| `nettool maskcalc 255.255.252.0`      | normal execution                           | 0         | std out |
-| `nettool maskcalc /22`                | normal execution                           | 0         | std out |
+| `nettool maskcalc 255.255.252.0`      | normal execution outputs 22                | 0         | std out |
+| `nettool maskcalc /22`                | normal execution outputs 255.255.252.0     | 0         | std out |
+| `nettool maskcalc 22`                 | normal execution outputs 255.255.252.0     | 0         | std out |
 | `nettool maskcalc` (no Argument)      | "Tool missing arguments" & exit            | 2         | err out |
 | `nettool maskcalc murks`              | "Wrong input"             & exit           | 2         | err out |
-| `nettool quatsch`                     | "Unknown Tool" print available tools & exit| 2         | err out |
 | `nettool maskcalc 255.255.252.0 extra`| "Too many arguments" & exit                | 2         | err out |
+| `nettool maskcalc 255.255.0.252`      | "Invalid Mask" & prompt & exit             | 2         | err out |
