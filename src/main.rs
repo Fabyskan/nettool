@@ -1,6 +1,7 @@
 mod input_control;
 mod maskcalc;
 mod subnet;
+mod tcp;
 use crate::input_control::InputArguments;
 use std::env;
 
@@ -17,6 +18,9 @@ fn main() {
         }
         "maskcalc" => {
             maskcalc::maskcalc(&arguments);
+        }
+        "tcp" => {
+            tcp::tcp(&arguments);
         }
         _ => {
             eprintln!("Unknown tool choose a provided tool: \n- subcalc");
