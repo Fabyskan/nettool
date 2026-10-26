@@ -23,7 +23,7 @@ impl Subnet {
         Ok(Self { net_addr, prefix })
     }
 
-    fn subnet_mask(prefix: u8) -> u32 {
+    pub fn subnet_mask(prefix: u8) -> u32 {
         if prefix != 0 {
             u32::MAX << (32 - prefix)
         } else {

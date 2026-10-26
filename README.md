@@ -1,10 +1,11 @@
 ### What the Program does ###
-The program takes an IPv4 address in CIDR format and computes, mask, first host, last host, broadcast, net address and total hosts.
+nettool is a small toolkit with different tools.
+
+At the moment only `subcalc` is available as a tool. It takes the IP in CIDR as Argument.
+The tool takes an IPv4 address in CIDR format and computes, mask, first host, last host, broadcast, net address and total hosts.
 
 ### How to Use ###
 Start the program via `cargo run -- [TOOL] [ARGUMENT]`
-
-At the moment only `subcalc` is available as a tool. It takes the IP in CIDR as Argument.
 
 For example: `cargo run -- subcalc 10.0.5.77/22`
 Output:
@@ -27,20 +28,22 @@ Tests are executed with `cargo test`
 ### Error Codes ###
 Wrong input will be handled internally and the program will stop.
 
-| Aufruf                               | Verhalten?                                 | Exit-Code | Kanal   |
+| Call                                 | Behaviour?                                 | Exit-Code | Channel |
 | ------------------------------------ | ------------------------------------------ | --------- | ------- |
-| `nettool` (ohne alles)               | Toolauswahl printen                        | 2         | err out |
-| `nettool subcalc 10.0.5.77/22`       | ganz normales ausführen des Rechners       | 0         | std out |
-| `nettool subcalc` (ohne Adresse)     | "Too missing arguments" Meldung und abbruch| 2         | err out |
-| `nettool subcalc murks`              | Wrong input Meldung und abbruch            | 2         | err out |
-| `nettool quatsch`                    | "Unknown Tool" Toolauswhahl print & abbruch| 2         | err out |
-| `nettool subcalc 10.0.5.77/22 extra` | "Too many arguments" Meldung und abbruch   | 2         | err out |
+| `nettool` (empty     )               | print available tools                      | 2         | err out |
+| `nettool subcalc 10.0.5.77/22`       | normal execution                           | 0         | std out |
+| `nettool subcalc` (no Argument)      | "Tool missing arguments" & exit            | 2         | err out |
+| `nettool subcalc murks`              | "Wrong input"             & exit           | 2         | err out |
+| `nettool quatsch`                    | "Unknown Tool" print available tools & exit| 2         | err out |
+| `nettool subcalc 10.0.5.77/22 extra` | "Too many arguments" & exit                | 2         | err out |
 
-```
-cargo run --  ; echo $?
-cargo run -- subcalc 10.0.5.77/22; echo $?
-cargo run -- subcalc ; echo $?
-cargo run -- subcalc murks ; echo $?
-cargo run -- quatsch ; echo $?
-cargo run -- subcalc 10.0.5.77/22 extra; echo $?
-```
+
+| Call                                  | Behaviour?                                 | Exit-Code | Channel |
+| ------------------------------------  | ------------------------------------------ | --------- | ------- |
+| `nettool` (empty     )                | print available tools                      | 2         | err out |
+| `nettool maskcalc 255.255.252.0`      | normal execution                           | 0         | std out |
+| `nettool maskcalc /22`                | normal execution                           | 0         | std out |
+| `nettool maskcalc` (no Argument)      | "Tool missing arguments" & exit            | 2         | err out |
+| `nettool maskcalc murks`              | "Wrong input"             & exit           | 2         | err out |
+| `nettool quatsch`                     | "Unknown Tool" print available tools & exit| 2         | err out |
+| `nettool maskcalc 255.255.252.0 extra`| "Too many arguments" & exit                | 2         | err out |

@@ -1,4 +1,5 @@
 mod input_control;
+mod maskcalc;
 mod subnet;
 use crate::input_control::InputArguments;
 use std::env;
@@ -13,6 +14,9 @@ fn main() {
     match arguments.tool() {
         "subcalc" => {
             subnet::subcalc(&arguments);
+        }
+        "maskcalc" => {
+            maskcalc::maskcalc(&arguments);
         }
         _ => {
             eprintln!("Unknown tool choose a provided tool: \n- subcalc");
