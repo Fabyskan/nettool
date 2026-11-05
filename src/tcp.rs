@@ -23,10 +23,10 @@ pub fn tcp(arguments: &InputArguments) {
                 Err(e) => {
                     match e.kind() {
                         std::io::ErrorKind::TimedOut => {
-                            eprintln!("Connection to {} not succesfull! Can`t reach host.", socket)
+                            eprintln!("Connection to {} not successfull! Can`t reach host.", socket)
                         }
                         std::io::ErrorKind::ConnectionRefused => {
-                            eprintln!("Connection to {} not succesfull! Port closed.", socket)
+                            eprintln!("Connection to {} not successfull! Port closed.", socket)
                         }
                         _ => eprintln!("{e}"),
                     }
@@ -51,6 +51,6 @@ fn tcp_connect(socket: SocketAddr) -> std::io::Result<()> {
     let time: Duration = Duration::new(5, 0);
     let now = Instant::now();
     TcpStream::connect_timeout(&socket, time)?;
-    println!("Connection to {} succesfull! Responded in {} ms",socket, now.elapsed().as_millis());
+    println!("Connection to {} successfull! Responded in {} ms",socket, now.elapsed().as_millis());
     Ok(())
 }
