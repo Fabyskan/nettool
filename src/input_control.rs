@@ -15,7 +15,7 @@ impl InputArguments {
 
     pub fn new(args: &[String]) -> Result<InputArguments, &'static str> {
         if args.len() < 2 {
-            return Err("No tool given! Choose a provided tool: \n- subcalc");
+            return Err("No tool given! Choose a provided tool: \n- subcalc \n- maskcalc \n- tcp");
         }
         let tool = args[1].clone();
         let argument = args[2..].to_vec();

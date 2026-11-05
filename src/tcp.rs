@@ -11,22 +11,22 @@ pub fn tcp(arguments: &InputArguments) {
             std::process::exit(2)
         }
         1 => {
-            let x = match from_something(arguments.argument(0)) {
-                Ok(x) => x,
+            let socket = match from_input(arguments.argument(0)) {
+                Ok(socket) => socket,
                 Err(e) => {
                     eprintln!("{e}");
                     std::process::exit(2);
                 }
             };
-            match tcp_connect(x) {
-                Ok(x) => x,
+            match tcp_connect(socket) {
+                Ok(socket) => socket,
                 Err(e) => {
                     match e.kind() {
                         std::io::ErrorKind::TimedOut => {
-                            eprintln!("Connection to {} not succesfull! Can`t reach host.", x)
+                            eprintln!("Connection to {} not succesfull! Can`t reach host.", socket)
                         }
                         std::io::ErrorKind::ConnectionRefused => {
-                            eprintln!("Connection to {} not succesfull! Port closed.", x)
+                            eprintln!("Connection to {} not succesfull! Port closed.", socket)
                         }
                         _ => eprintln!("{e}"),
                     }
@@ -41,16 +41,16 @@ pub fn tcp(arguments: &InputArguments) {
     }
 }
 
-fn from_something(input: &str) -> Result<SocketAddr, String> {
-    let test: SocketAddr = input
+fn from_input(input: &str) -> Result<SocketAddr, String> {
+    let socket: SocketAddr = input
         .parse()
         .map_err(|_| "Wrong input! Consider 10.0.5.77:22")?;
-    Ok(test)
+    Ok(socket)
 }
-fn tcp_connect(x: SocketAddr) -> std::io::Result<()> {
+fn tcp_connect(socket: SocketAddr) -> std::io::Result<()> {
     let time: Duration = Duration::new(5, 0);
     let now = Instant::now();
-    TcpStream::connect_timeout(&x, time)?;
-    println!("Connection to {} succesfull! Responded in {} ms",x, now.elapsed().as_millis());
+    TcpStream::connect_timeout(&socket, time)?;
+    println!("Connection to {} succesfull! Responded in {} ms",socket, now.elapsed().as_millis());
     Ok(())
 }
